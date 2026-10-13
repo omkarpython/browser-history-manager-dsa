@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser History Manager | DSA Mini Project</title>
+    <meta name="description" content="A modern, interactive Browser History Manager implementing the Stack Data Structure (LIFO) in Python and Flask.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-wrapper">
+        <!-- Toast Notification -->
+        <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-titles">
+                    <div class="title-row">
+                        <span class="header-icon">🌐</span>
+                        <h1 id="appTitle">Browser History Manager</h1>
+                    </div>
+                    <p id="appSubtitle" class="subtitle">DSA Mini Project — Stack Data Structure</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="main-container">
+
+            <!-- Control & Navigation Bar Card -->
+            <section class="card control-card" aria-labelledby="controls-heading">
+                <h2 id="controls-heading" class="sr-only">Browser Navigation Controls</h2>
+                
+                <form id="urlForm" class="url-input-form" onsubmit="return false;">
+                    <div class="input-group">
+                        <span class="input-icon">🔍</span>
+                        <input 
+                            type="text" 
+                            id="urlInput" 
+                            class="url-input" 
+                            placeholder="Enter website URL (e.g., https://www.google.com)" 
+                            autocomplete="off"
+                            spellcheck="false"
+                            required
+                        >
+                        <button type="submit" id="visitBtn" class="btn btn-primary">
+                            <span class="btn-icon">⚡</span>
+                            <span>Visit Website</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Quick Samples for Viva Testing -->
+                <div class="sample-urls">
+                    <span class="sample-label">Quick Test URLs:</span>
+                    <button type="button" class="chip" data-url="https://www.google.com">google.com</button>
+                    <button type="button" class="chip" data-url="https://github.com">github.com</button>
+                    <button type="button" class="chip" data-url="https://en.wikipedia.org">wikipedia.org</button>
+                    <button type="button" class="chip" data-url="https://stackoverflow.com">stackoverflow.com</button>
+                    <button type="button" class="chip" data-url="https://youtube.com">youtube.com</button>
+                </div>
+
+                <!-- Navigation Action Buttons -->
+                <div class="action-buttons-row">
+                    <div class="nav-buttons-group">
+                        <button id="backBtn" class="btn btn-secondary" title="Go to previous website" disabled>
+                            <span class="btn-icon">←</span>
+                            <span>Go Back</span>
+                        </button>
+                        <button id="forwardBtn" class="btn btn-secondary" title="Go to forward website" disabled>
+                            <span>Go Forward</span>
+                            <span class="btn-icon">→</span>
+                        </button>
+                    </div>
+
+                    <div class="secondary-actions-group">
+                        <button id="clearBtn" class="btn btn-danger-outline" title="Clear all history and reset stacks">
+                            <span class="btn-icon">🗑️</span>
+                            <span>Clear History</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Current Page Card -->
+            <section class="card current-page-card" aria-labelledby="current-page-heading">
+                <div class="card-header">
+                    <div class="header-left">
+                        <span class="card-icon">📍</span>
+                        <h2 id="current-page-heading">Current Page</h2>
+                    </div>
+                    <span id="currentStatusBadge" class="badge badge-muted">Not Loaded</span>
+                </div>
+                <div class="current-page-body">
+                    <div class="browser-address-bar">
+                        <div class="browser-dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <div class="address-display">
+                            <span class="lock-icon">🔒</span>
+                            <span id="currentPageDisplay" class="address-text">No page is currently open.</span>
+                        </div>
+                        <div class="address-actions">
+                            <a id="openLinkBtn" href="#" target="_blank" rel="noopener noreferrer" class="link-btn disabled" title="Open in browser">↗</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- Complete Browsing History Section -->
+            <section class="card history-section" aria-labelledby="history-heading">
+                <div class="card-header">
+                    <div class="header-left">
+                        <span class="card-icon">📜</span>
+                        <h2 id="history-heading">Browsing History</h2>
+                    </div>
+                    <span id="historyStatusBadge" class="badge badge-info">History Overview</span>
+                </div>
+
+                <div class="history-content-grid">
+                    <!-- 1. Previously Visited -->
+                    <div class="history-column previously-visited-col">
+                        <div class="col-header">
+                            <h4>Previously Visited</h4>
+                            <span class="col-desc">Most Recent First (Reverse Order)</span>
+                        </div>
+                        <ol id="prevVisitedList" class="history-list">
+                            <li class="empty-item">No previous pages.</li>
+                        </ol>
+                    </div>
+
+                    <!-- 2. Active Page -->
+                    <div class="history-column active-page-col">
+                        <div class="col-header">
+                            <h4>★ Current Page</h4>
+                            <span class="col-desc">Active in Session</span>
+                        </div>
+                        <div id="historyCurrentPageCard" class="history-current-card">
+                            <span class="empty-item">No page is currently open.</span>
+                        </div>
+                    </div>
+
+                    <!-- 3. Forward History -->
+                    <div class="history-column forward-history-col">
+                        <div class="col-header">
+                            <h4>Forward History</h4>
+                            <span class="col-desc">Forward Traversal Order</span>
+                        </div>
+                        <ol id="forwardHistoryList" class="history-list">
+                            <li class="empty-item">No forward pages.</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Browser History Manager &bull; Python Flask REST API &bull; Data Structures & Algorithms Project</p>
+        </footer>
+    </div>
+
+    <!-- Main JavaScript -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
